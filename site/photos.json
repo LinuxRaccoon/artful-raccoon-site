@@ -11,94 +11,52 @@
     {
       "id": "astro",
       "label": "Astro"
-    },
-    {
-      "id": "flora",
-      "label": "Flora"
-    },
-    {
-      "id": "birds",
-      "label": "Birds"
-    },
-    {
-      "id": "insects",
-      "label": "Insects"
     }
   ],
   "photos": [
     {
-      "id": "purple-loosestrife",
-      "category": "flora",
-      "filename": "purple-loosestrife.webp",
-      "title": "Purple Loosestrife",
-      "description": "Taken at Pagham Harbour",
+      "id": "sample-wildlife",
+      "category": "wildlife",
+      "filename": "sample-wildlife.webp",
+      "title": "Sample photo \u2014 replace via the builder",
+      "description": "This is a placeholder so you can see the layout. Use the builder tool to add your own photos and this will disappear from view once you remove it from photos.json.",
       "order": 0,
       "featured": true,
       "exif": {
-        "aperture": "",
-        "shutter": "",
-        "iso": "",
-        "focalLength": ""
+        "aperture": "5.6",
+        "shutter": "1/1000s",
+        "iso": "400",
+        "focalLength": "250"
       }
     },
     {
-      "id": "pagham-harbour",
-      "category": "birds",
-      "filename": "pagham-harbour.webp",
-      "title": "Pagham Harbour",
-      "description": "Cattle Egrets, Grey Heron & Curlew",
+      "id": "sample-landscape",
+      "category": "landscape",
+      "filename": "sample-landscape.webp",
+      "title": "Sample photo",
+      "description": "Placeholder \u2014 swap for a real landscape shot via the builder.",
       "order": 0,
       "featured": false,
       "exif": {
-        "aperture": "",
-        "shutter": "",
-        "iso": "",
-        "focalLength": ""
+        "aperture": "8",
+        "shutter": "1/250s",
+        "iso": "100",
+        "focalLength": "24"
       }
     },
     {
-      "id": "footprints",
-      "category": "birds",
-      "filename": "footprints.webp",
-      "title": "Footprints",
-      "description": "A black Headed Gull strolls through the mud",
-      "order": 1,
-      "featured": false,
-      "exif": {
-        "aperture": "",
-        "shutter": "",
-        "iso": "",
-        "focalLength": ""
-      }
-    },
-    {
-      "id": "grey-herons-at-rest",
-      "category": "birds",
-      "filename": "grey-herons-at-rest.webp",
-      "title": "Grey Herons at rest",
-      "description": "A view across from North Wall, Pagham Harbour.",
-      "order": 2,
-      "featured": false,
-      "exif": {
-        "aperture": "",
-        "shutter": "",
-        "iso": "",
-        "focalLength": ""
-      }
-    },
-    {
-      "id": "common-blue-damselflies",
-      "category": "insects",
-      "filename": "common-blue-damselflies.webp",
-      "title": "Common Blue Damselflies",
-      "description": "Shot at Weald & Download Museum",
+      "id": "sample-astro",
+      "category": "astro",
+      "filename": "sample-astro.webp",
+      "title": "Sample photo",
+      "description": "Placeholder \u2014 swap for a real astro shot via the builder.",
       "order": 0,
       "featured": false,
       "exif": {
-        "aperture": "",
-        "shutter": "",
-        "iso": "",
-        "focalLength": ""
+        "aperture": "2.8",
+        "shutter": "15s",
+        "iso": "3200",
+        "focalLength": "18"
       }
     }
   ]
