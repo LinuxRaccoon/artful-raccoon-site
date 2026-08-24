@@ -114,6 +114,10 @@ code {
   width: 100%;
 }
 
+#cancel-edit-btn {
+  margin-top: 10px;
+}
+
 .builder-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -314,6 +318,31 @@ code {
   color: var(--text-faint);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
+}
+
+.item-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-dim);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  color: var(--moss);
+}
+
+.delete-btn:hover {
+  color: var(--red);
 }
 
 .toast {

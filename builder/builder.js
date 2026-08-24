@@ -11,6 +11,8 @@ let currentFile = null
 let crop = { scale: 1, baseScale: 1, offsetX: 0, offsetY: 0, zoomFactor: 1 }
 let dragging = false
 let dragStart = { x: 0, y: 0, offsetX: 0, offsetY: 0 }
+let editingId = null // set while editing an existing saved entry
+let libraryObjectUrls = [] // tracked so we can revoke on re-render
 
 const el = (id) => document.getElementById(id)
 
@@ -234,10 +236,6 @@ function exportCroppedImage() {
 
 el('photo-form').addEventListener('submit', async (e) => {
   e.preventDefault()
-  if (!currentImage || !currentFile) {
-    showToast('Choose a photo first.', true)
-    return
-  }
 
   let categoryId = el('field-category').value
   if (categoryId === '__new__') {
@@ -255,40 +253,71 @@ el('photo-form').addEventListener('submit', async (e) => {
     return
   }
 
+  const editingEntry = editingId ? store.photos.find((p) => p.id === editingId) : null
+
+  if (!editingEntry && (!currentImage || !currentFile)) {
+    showToast('Choose a photo first.', true)
+    return
+  }
+
   try {
-    const blob = await exportCroppedImage()
-    const filename = uniqueFilename(title)
-
-    const fileHandle = await photosDirHandle.getFileHandle(filename, { create: true })
-    const writable = await fileHandle.createWritable()
-    await writable.write(blob)
-    await writable.close()
-
     const featured = el('field-featured').checked
-    if (featured) {
-      store.photos.forEach((p) => (p.featured = false))
+    const exif = {
+      aperture: el('exif-aperture').value.trim(),
+      shutter: el('exif-shutter').value.trim(),
+      iso: el('exif-iso').value.trim(),
+      focalLength: el('exif-focal').value.trim(),
+    }
+    const description = el('field-description').value.trim()
+
+    if (editingEntry) {
+      // Replace the image file only if a new one was chosen; otherwise keep it as-is.
+      if (currentImage && currentFile) {
+        const blob = await exportCroppedImage()
+        const fileHandle = await photosDirHandle.getFileHandle(editingEntry.filename, { create: true })
+        const writable = await fileHandle.createWritable()
+        await writable.write(blob)
+        await writable.close()
+      }
+
+      if (featured) store.photos.forEach((p) => (p.featured = false))
+
+      editingEntry.category = categoryId
+      editingEntry.title = title
+      editingEntry.description = description
+      editingEntry.featured = featured
+      editingEntry.exif = exif
+
+      await saveStore()
+      showToast(`Updated "${title}".`)
+    } else {
+      const blob = await exportCroppedImage()
+      const filename = uniqueFilename(title)
+
+      const fileHandle = await photosDirHandle.getFileHandle(filename, { create: true })
+      const writable = await fileHandle.createWritable()
+      await writable.write(blob)
+      await writable.close()
+
+      if (featured) store.photos.forEach((p) => (p.featured = false))
+
+      const order = store.photos.filter((p) => p.category === categoryId).length
+
+      store.photos.push({
+        id: filename.replace(/\.webp$/, ''),
+        category: categoryId,
+        filename,
+        title,
+        description,
+        order,
+        featured,
+        exif,
+      })
+
+      await saveStore()
+      showToast(`Saved "${title}" to ${categoryId}.`)
     }
 
-    const order = store.photos.filter((p) => p.category === categoryId).length
-
-    store.photos.push({
-      id: filename.replace(/\.webp$/, ''),
-      category: categoryId,
-      filename,
-      title,
-      description: el('field-description').value.trim(),
-      order,
-      featured,
-      exif: {
-        aperture: el('exif-aperture').value.trim(),
-        shutter: el('exif-shutter').value.trim(),
-        iso: el('exif-iso').value.trim(),
-        focalLength: el('exif-focal').value.trim(),
-      },
-    })
-
-    await saveStore()
-    showToast(`Saved "${title}" to ${categoryId}.`)
     renderLibrary()
     resetForm()
   } catch (err) {
@@ -300,6 +329,7 @@ el('photo-form').addEventListener('submit', async (e) => {
 function resetForm() {
   currentImage = null
   currentFile = null
+  editingId = null
   el('file-input').value = ''
   el('file-drop-label').textContent = 'Choose a photo to add'
   el('crop-viewport').hidden = true
@@ -307,6 +337,55 @@ function resetForm() {
   el('photo-form').hidden = true
   el('photo-form').reset()
   el('new-category-row').hidden = true
+  el('cancel-edit-btn').hidden = true
+  el('save-btn').textContent = 'Save to gallery'
+}
+
+function startEdit(entry) {
+  editingId = entry.id
+  currentImage = null
+  currentFile = null
+
+  el('field-title').value = entry.title || ''
+  el('field-description').value = entry.description || ''
+  el('field-category').value = entry.category
+  el('field-featured').checked = !!entry.featured
+  el('exif-aperture').value = entry.exif?.aperture || ''
+  el('exif-shutter').value = entry.exif?.shutter || ''
+  el('exif-iso').value = entry.exif?.iso || ''
+  el('exif-focal').value = entry.exif?.focalLength || ''
+
+  el('file-drop-label').textContent = `Editing "${entry.title}" — choose a photo here only to replace the image`
+  el('crop-viewport').hidden = true
+  el('crop-controls').hidden = true
+  el('photo-form').hidden = false
+  el('new-category-row').hidden = true
+  el('cancel-edit-btn').hidden = false
+  el('save-btn').textContent = 'Save changes'
+
+  el('photo-form').scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+el('cancel-edit-btn').addEventListener('click', resetForm)
+
+async function deletePhoto(id) {
+  const entry = store.photos.find((p) => p.id === id)
+  if (!entry) return
+  const ok = window.confirm(`Delete "${entry.title}"? This removes the image file too.`)
+  if (!ok) return
+
+  try {
+    await photosDirHandle.removeEntry(entry.filename)
+  } catch (err) {
+    console.warn('Could not remove image file (it may already be gone):', err)
+  }
+
+  store.photos = store.photos.filter((p) => p.id !== id)
+  await saveStore()
+  showToast(`Deleted "${entry.title}".`)
+
+  if (editingId === id) resetForm()
+  renderLibrary()
 }
 
 // ---------- Library list ----------
@@ -314,18 +393,50 @@ function resetForm() {
 function renderLibrary() {
   el('photo-count').textContent = store.photos.length
   const list = el('photo-list')
+
+  // Revoke previous object URLs before replacing the list
+  libraryObjectUrls.forEach((url) => URL.revokeObjectURL(url))
+  libraryObjectUrls = []
+
   list.innerHTML = store.photos
     .map(
       (p) => `
-      <li>
-        <img src="photos/${p.filename}" alt="">
+      <li data-id="${p.id}">
+        <img data-filename="${escapeHtml(p.filename)}" alt="">
         <div class="item-info">
           <div class="item-title">${escapeHtml(p.title)}</div>
           <div class="item-category">${escapeHtml(p.category)}${p.featured ? ' \u2605' : ''}</div>
+          <div class="item-actions">
+            <button type="button" class="link-btn edit-btn">Edit</button>
+            <button type="button" class="link-btn delete-btn">Delete</button>
+          </div>
         </div>
       </li>`
     )
     .join('')
+
+  // Load each thumbnail from the connected folder (not a web URL — the builder
+  // page has no server-visible "photos" path of its own).
+  list.querySelectorAll('img[data-filename]').forEach(async (img) => {
+    try {
+      const fileHandle = await photosDirHandle.getFileHandle(img.dataset.filename)
+      const file = await fileHandle.getFile()
+      const url = URL.createObjectURL(file)
+      libraryObjectUrls.push(url)
+      img.src = url
+    } catch (err) {
+      console.warn(`Could not load thumbnail for ${img.dataset.filename}:`, err)
+    }
+  })
+
+  list.querySelectorAll('li').forEach((li) => {
+    const id = li.dataset.id
+    li.querySelector('.edit-btn').addEventListener('click', () => {
+      const entry = store.photos.find((p) => p.id === id)
+      if (entry) startEdit(entry)
+    })
+    li.querySelector('.delete-btn').addEventListener('click', () => deletePhoto(id))
+  })
 }
 
 // ---------- Helpers ----------
