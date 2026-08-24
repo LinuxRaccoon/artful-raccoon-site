@@ -39,6 +39,13 @@ function renderHero() {
   `
 }
 
+function selectCategory(categoryId) {
+  state.activeCategory = categoryId
+  renderTabs()
+  renderTagline()
+  renderGrid()
+}
+
 function renderTabs() {
   const nav = document.getElementById('gallery-nav')
   nav.innerHTML = state.data.categories
@@ -50,10 +57,25 @@ function renderTabs() {
     .join('')
 
   nav.querySelectorAll('.gallery-tab').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.activeCategory = btn.dataset.category
-      renderTabs()
-      renderGrid()
+    btn.addEventListener('click', () => selectCategory(btn.dataset.category))
+  })
+}
+
+function renderTagline() {
+  const tagline = document.getElementById('site-tagline')
+  tagline.innerHTML = state.data.categories
+    .map((cat, i) => {
+      const active = cat.id === state.activeCategory ? ' active' : ''
+      const sep = i > 0 ? '<span class="sep">&middot;</span>' : ''
+      return `${sep}<a href="#gallery-nav" class="${active}" data-category="${cat.id}">${escapeHtml(cat.label)}</a>`
+    })
+    .join('')
+
+  tagline.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault()
+      selectCategory(link.dataset.category)
+      document.getElementById('gallery-nav').scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
   })
 }
@@ -107,6 +129,16 @@ function closeLightbox() {
   const lightbox = document.getElementById('lightbox')
   lightbox.hidden = true
   document.body.style.overflow = ''
+  if (document.fullscreenElement) document.exitFullscreen()
+}
+
+function toggleFullscreen() {
+  const lightbox = document.getElementById('lightbox')
+  if (document.fullscreenElement) {
+    document.exitFullscreen()
+  } else if (lightbox.requestFullscreen) {
+    lightbox.requestFullscreen()
+  }
 }
 
 function escapeHtml(str) {
@@ -122,9 +154,11 @@ async function init() {
 
   renderHero()
   renderTabs()
+  renderTagline()
   renderGrid()
 
   document.getElementById('lightbox-close').addEventListener('click', closeLightbox)
+  document.getElementById('lightbox-fullscreen').addEventListener('click', toggleFullscreen)
   document.getElementById('lightbox').addEventListener('click', (e) => {
     if (e.target.id === 'lightbox') closeLightbox()
   })
