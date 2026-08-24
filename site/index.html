@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Artful Raccoon Photography</title>
+  <meta name="description" content="Wildlife, landscape, and astro photography.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <span class="site-title">Artful <span class="accent">Raccoon</span></span>
+    <span class="site-tagline">Wildlife &middot; Landscape &middot; Astro</span>
+  </header>
+
+  <div class="hero" id="hero"></div>
+
+  <nav class="gallery-nav" id="gallery-nav"></nav>
+
+  <main class="gallery-section" id="gallery-section"></main>
+
+  <footer class="site-footer">
+    &copy; <span id="year"></span> The Artful Raccoon Photography
+  </footer>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+    <div class="lightbox-inner">
+      <img id="lightbox-img" alt="">
+      <div class="lightbox-meta">
+        <div>
+          <h2 id="lightbox-title"></h2>
+          <p id="lightbox-desc"></p>
+        </div>
+        <div class="lightbox-exif" id="lightbox-exif"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear()</script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

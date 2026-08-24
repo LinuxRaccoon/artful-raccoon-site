@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RunList Gallery Builder</title>
+  <link rel="stylesheet" href="builder.css">
+</head>
+<body>
+  <div class="builder">
+    <header class="builder-header">
+      <h1>Gallery Builder</h1>
+      <span id="connection-status" class="status">Not connected</span>
+    </header>
+
+    <section id="connect-screen" class="panel connect-screen">
+      <p>Connect the <code>site</code> folder (the one containing <code>photos.json</code> and the <code>photos</code> folder) to get started.</p>
+      <button id="connect-btn" class="btn btn-primary">Connect site folder</button>
+      <p class="hint">This must be opened over <code>http://localhost</code>, not by double-clicking the file — see README.</p>
+    </section>
+
+    <section id="main-screen" class="panel" hidden>
+      <div class="builder-grid">
+        <div class="crop-column">
+          <label class="file-drop" id="file-drop">
+            <input type="file" id="file-input" accept="image/*" hidden>
+            <span id="file-drop-label">Choose a photo to add</span>
+          </label>
+
+          <div class="crop-viewport" id="crop-viewport" hidden>
+            <img id="crop-img" alt="" draggable="false">
+          </div>
+
+          <div class="crop-controls" id="crop-controls" hidden>
+            <label class="slider-label">
+              Zoom
+              <input type="range" id="zoom-slider" min="1" max="3" step="0.01" value="1">
+            </label>
+          </div>
+        </div>
+
+        <form class="fields-column" id="photo-form" hidden>
+          <label>
+            Title
+            <input type="text" id="field-title" required placeholder="e.g. Barn Owl at Dusk">
+          </label>
+
+          <label>
+            Description
+            <textarea id="field-description" rows="4" placeholder="A few sentences about the shot…"></textarea>
+          </label>
+
+          <label>
+            Gallery
+            <select id="field-category"></select>
+          </label>
+
+          <div id="new-category-row" class="new-category-row" hidden>
+            <input type="text" id="new-category-label" placeholder="New gallery name, e.g. Macro">
+            <button type="button" id="add-category-btn" class="btn btn-secondary">Add</button>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="field-featured">
+            Use as homepage hero image
+          </label>
+
+          <fieldset class="exif-fieldset">
+            <legend>EXIF (read automatically, editable)</legend>
+            <div class="exif-grid">
+              <label>Aperture <input type="text" id="exif-aperture" placeholder="5.6"></label>
+              <label>Shutter <input type="text" id="exif-shutter" placeholder="1/1000s"></label>
+              <label>ISO <input type="text" id="exif-iso" placeholder="400"></label>
+              <label>Focal length (mm) <input type="text" id="exif-focal" placeholder="250"></label>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn-primary btn-block">Save to gallery</button>
+        </form>
+      </div>
+
+      <div class="library">
+        <h2>In this gallery site (<span id="photo-count">0</span>)</h2>
+        <ul id="photo-list" class="photo-list"></ul>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" hidden></div>
+  </div>
+
+  <script src="vendor/exifr.js"></script>
+  <script src="builder.js"></script>
+</body>
+</html>
