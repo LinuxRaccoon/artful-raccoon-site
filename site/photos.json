@@ -33,7 +33,7 @@
       "title": "Purple Loosestrife",
       "description": "Taken at Pagham Harbour",
       "order": 0,
-      "featured": true,
+      "featured": false,
       "exif": {
         "aperture": "",
         "shutter": "",
@@ -93,12 +93,35 @@
       "title": "Common Blue Damselflies",
       "description": "Shot at Weald & Download Museum",
       "order": 0,
+      "featured": true,
+      "exif": {
+        "aperture": "",
+        "shutter": "",
+        "iso": "",
+        "focalLength": ""
+      },
+      "location": {
+        "lat": 50.90862119237247,
+        "lng": -0.7577508687973024
+      }
+    },
+    {
+      "id": "black-tailed-godwit",
+      "category": "birds",
+      "filename": "black-tailed-godwit.webp",
+      "title": "Black-tailed Godwit",
+      "description": "Feeding at Pagham Harbour",
+      "order": 3,
       "featured": false,
       "exif": {
         "aperture": "",
         "shutter": "",
         "iso": "",
         "focalLength": ""
+      },
+      "location": {
+        "lat": 50.7725037710878,
+        "lng": -0.7673209905624391
       }
     }
   ]
