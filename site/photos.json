@@ -33,7 +33,7 @@
       "title": "Purple Loosestrife",
       "description": "Taken at Pagham Harbour",
       "order": 0,
-      "featured": false,
+      "featured": true,
       "exif": {
         "aperture": "",
         "shutter": "",
@@ -63,12 +63,16 @@
       "title": "Footprints",
       "description": "A black Headed Gull strolls through the mud",
       "order": 1,
-      "featured": false,
+      "featured": true,
       "exif": {
         "aperture": "",
         "shutter": "",
         "iso": "",
         "focalLength": ""
+      },
+      "location": {
+        "lat": 50.77297192877692,
+        "lng": -0.7618170976638795
       }
     },
     {
