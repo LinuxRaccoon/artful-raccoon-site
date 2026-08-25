@@ -444,6 +444,12 @@ button {
   overflow: hidden;
   border: 1px solid var(--border);
   filter: grayscale(0.4) brightness(0.9);
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.lightbox-map:hover {
+  filter: grayscale(0.1) brightness(1);
 }
 
 .lightbox-close,

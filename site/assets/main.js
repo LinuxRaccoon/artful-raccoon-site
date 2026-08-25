@@ -23,6 +23,7 @@ let pinchStartScale = null
 
 let lightboxMap = null
 let lightboxMarker = null
+let currentLightboxLocation = null // { lat, lng } for the map click handler to read
 
 function formatExif(exif) {
   if (!exif) return ''
@@ -171,10 +172,12 @@ function showLightboxMap(location) {
 
   if (!location) {
     mapEl.hidden = true
+    currentLightboxLocation = null
     return
   }
 
   mapEl.hidden = false
+  currentLightboxLocation = location
 
   if (!lightboxMap) {
     lightboxMap = L.map('lightbox-map', {
@@ -190,6 +193,12 @@ function showLightboxMap(location) {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
     }).addTo(lightboxMap)
+
+    lightboxMap.on('click', () => {
+      if (!currentLightboxLocation) return
+      const { lat, lng } = currentLightboxLocation
+      window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank', 'noopener')
+    })
   }
 
   lightboxMap.setView([location.lat, location.lng], 11)
