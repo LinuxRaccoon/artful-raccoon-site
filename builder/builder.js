@@ -350,8 +350,6 @@ el('photo-form').addEventListener('submit', async (e) => {
         await writable.close()
       }
 
-      if (featured) store.photos.forEach((p) => (p.featured = false))
-
       editingEntry.category = categoryId
       editingEntry.title = title
       editingEntry.description = description
@@ -373,8 +371,6 @@ el('photo-form').addEventListener('submit', async (e) => {
       const writable = await fileHandle.createWritable()
       await writable.write(blob)
       await writable.close()
-
-      if (featured) store.photos.forEach((p) => (p.featured = false))
 
       const order = store.photos.filter((p) => p.category === categoryId).length
 

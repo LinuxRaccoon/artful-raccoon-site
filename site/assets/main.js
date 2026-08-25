@@ -25,6 +25,13 @@ let lightboxMap = null
 let lightboxMarker = null
 let currentLightboxLocation = null // { lat, lng } for the map click handler to read
 
+const heroState = {
+  photos: [],
+  index: 0,
+  timer: null,
+}
+const HERO_ROTATE_MS = 6000
+
 function formatExif(exif) {
   if (!exif) return ''
   const parts = []
@@ -43,22 +50,101 @@ function photosForCategory(categoryId) {
 
 function renderHero() {
   const hero = document.getElementById('hero')
-  const featured =
-    state.data.photos.find((p) => p.featured) || state.data.photos[0]
+  const featured = state.data.photos.filter((p) => p.featured)
+  heroState.photos = featured.length ? featured : state.data.photos.slice(0, 1)
+  heroState.index = 0
+  stopHeroAutoRotate()
 
-  if (!featured) {
+  if (heroState.photos.length === 0) {
     hero.style.display = 'none'
+    hero.innerHTML = ''
     return
   }
 
   hero.style.display = ''
-  hero.innerHTML = `
-    <img class="hero-img" src="photos/${featured.filename}" alt="${escapeHtml(featured.title || '')}">
-    <div class="hero-caption">
-      <h1>${escapeHtml(featured.title || 'Untitled')}</h1>
-      <div class="hero-exif">${formatExif(featured.exif)}</div>
-    </div>
-  `
+
+  const slidesHtml = heroState.photos
+    .map(
+      (p, i) => `
+      <div class="hero-slide${i === 0 ? ' active' : ''}" data-index="${i}">
+        <img class="hero-img" src="photos/${p.filename}" alt="${escapeHtml(p.title || '')}">
+        <div class="hero-caption">
+          <h1>${escapeHtml(p.title || 'Untitled')}</h1>
+          <div class="hero-exif">${formatExif(p.exif)}</div>
+        </div>
+      </div>`
+    )
+    .join('')
+
+  const controlsHtml =
+    heroState.photos.length > 1
+      ? `
+      <button class="hero-nav hero-prev" aria-label="Previous featured photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="hero-nav hero-next" aria-label="Next featured photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+      <div class="hero-dots">
+        ${heroState.photos
+          .map((_, i) => `<button class="hero-dot${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="Go to featured photo ${i + 1}"></button>`)
+          .join('')}
+      </div>`
+      : ''
+
+  hero.innerHTML = `<div class="hero-slides">${slidesHtml}</div>${controlsHtml}`
+
+  if (heroState.photos.length > 1) {
+    hero.querySelector('.hero-prev').addEventListener('click', () => advanceHero(-1, true))
+    hero.querySelector('.hero-next').addEventListener('click', () => advanceHero(1, true))
+    hero.querySelectorAll('.hero-dot').forEach((dot) => {
+      dot.addEventListener('click', () => goToHeroSlide(Number(dot.dataset.index)))
+    })
+    hero.addEventListener('mouseenter', stopHeroAutoRotate)
+    hero.addEventListener('mouseleave', startHeroAutoRotate)
+    startHeroAutoRotate()
+  }
+}
+
+function showHeroSlide() {
+  const hero = document.getElementById('hero')
+  hero.querySelectorAll('.hero-slide').forEach((el) => {
+    el.classList.toggle('active', Number(el.dataset.index) === heroState.index)
+  })
+  hero.querySelectorAll('.hero-dot').forEach((el) => {
+    el.classList.toggle('active', Number(el.dataset.index) === heroState.index)
+  })
+}
+
+function goToHeroSlide(index) {
+  heroState.index = index
+  showHeroSlide()
+  restartHeroAutoRotate()
+}
+
+function advanceHero(direction, isManual) {
+  const count = heroState.photos.length
+  heroState.index = (heroState.index + direction + count) % count
+  showHeroSlide()
+  if (isManual) restartHeroAutoRotate()
+}
+
+function startHeroAutoRotate() {
+  if (heroState.photos.length <= 1) return
+  stopHeroAutoRotate()
+  heroState.timer = setInterval(() => advanceHero(1, false), HERO_ROTATE_MS)
+}
+
+function stopHeroAutoRotate() {
+  if (heroState.timer !== null) {
+    clearInterval(heroState.timer)
+    heroState.timer = null
+  }
+}
+
+function restartHeroAutoRotate() {
+  stopHeroAutoRotate()
+  startHeroAutoRotate()
 }
 
 function selectCategory(categoryId) {
