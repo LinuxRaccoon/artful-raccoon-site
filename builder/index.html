@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RunList Gallery Builder</title>
   <link rel="stylesheet" href="builder.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
   <div class="builder">
@@ -75,6 +76,15 @@
             </div>
           </fieldset>
 
+          <fieldset class="location-fieldset">
+            <legend>Location (optional — click the map to tag)</legend>
+            <div id="location-map" class="location-map"></div>
+            <div class="location-row">
+              <span id="location-value" class="location-value">Not tagged</span>
+              <button type="button" id="clear-location-btn" class="link-btn" hidden>Clear location</button>
+            </div>
+          </fieldset>
+
           <button type="submit" id="save-btn" class="btn btn-primary btn-block">Save to gallery</button>
           <button type="button" id="cancel-edit-btn" class="btn btn-secondary btn-block" hidden>Cancel edit</button>
         </form>
@@ -90,6 +100,7 @@
   </div>
 
   <script src="vendor/exifr.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="builder.js"></script>
 </body>
 </html>

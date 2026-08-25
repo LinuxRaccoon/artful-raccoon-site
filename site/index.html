@@ -6,6 +6,7 @@
   <title>The Artful Raccoon Photography</title>
   <meta name="description" content="Wildlife, landscape, and astro photography.">
   <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
   <header class="site-header">
@@ -48,12 +49,16 @@
           <h2 id="lightbox-title"></h2>
           <p id="lightbox-desc"></p>
         </div>
-        <div class="lightbox-exif" id="lightbox-exif"></div>
+        <div class="lightbox-side">
+          <div class="lightbox-exif" id="lightbox-exif"></div>
+          <div class="lightbox-map" id="lightbox-map" hidden></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>document.getElementById('year').textContent = new Date().getFullYear()</script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/main.js"></script>
 </body>
 </html>

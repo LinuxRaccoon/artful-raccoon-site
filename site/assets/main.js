@@ -21,6 +21,9 @@ let panStart = null // { x, y, zoomX, zoomY } at drag start
 let pinchStartDist = null
 let pinchStartScale = null
 
+let lightboxMap = null
+let lightboxMarker = null
+
 function formatExif(exif) {
   if (!exif) return ''
   const parts = []
@@ -154,9 +157,51 @@ function showLightboxPhoto() {
   document.getElementById('lightbox-title').textContent = photo.title || 'Untitled'
   document.getElementById('lightbox-desc').textContent = photo.description || ''
   document.getElementById('lightbox-exif').textContent = formatExif(photo.exif)
+  showLightboxMap(photo.location)
 
   document.getElementById('lightbox-prev').disabled = lightboxState.index <= 0
   document.getElementById('lightbox-next').disabled = lightboxState.index >= lightboxState.photos.length - 1
+}
+
+// A small, static (non-interactive) map — just a "roughly here" pin. Zoom/drag
+// are disabled so it doesn't compete with the lightbox's own pinch-zoom and
+// drag-to-pan gestures on the main photo.
+function showLightboxMap(location) {
+  const mapEl = document.getElementById('lightbox-map')
+
+  if (!location) {
+    mapEl.hidden = true
+    return
+  }
+
+  mapEl.hidden = false
+
+  if (!lightboxMap) {
+    lightboxMap = L.map('lightbox-map', {
+      zoomControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      attributionControl: false,
+    })
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+    }).addTo(lightboxMap)
+  }
+
+  lightboxMap.setView([location.lat, location.lng], 11)
+  if (lightboxMarker) {
+    lightboxMarker.setLatLng([location.lat, location.lng])
+  } else {
+    lightboxMarker = L.marker([location.lat, location.lng]).addTo(lightboxMap)
+  }
+
+  // The map box may have just gone from hidden to visible, so Leaflet needs
+  // to recalculate its container size before the view above will render right.
+  setTimeout(() => lightboxMap && lightboxMap.invalidateSize(), 0)
 }
 
 function showPrevPhoto() {

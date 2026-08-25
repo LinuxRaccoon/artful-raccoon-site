@@ -14,6 +14,13 @@ let dragStart = { x: 0, y: 0, offsetX: 0, offsetY: 0 }
 let editingId = null // set while editing an existing saved entry
 let libraryObjectUrls = [] // tracked so we can revoke on re-render
 
+let locationMap = null
+let locationMarker = null
+let currentLocation = null // { lat, lng } or null
+
+const DEFAULT_MAP_CENTER = [50.77, -0.79] // Selsey/Chichester area — where most shots are taken
+const DEFAULT_MAP_ZOOM = 11
+
 const el = (id) => document.getElementById(id)
 
 function showToast(message, isError = false) {
@@ -100,6 +107,66 @@ el('add-category-btn').addEventListener('click', () => {
   showToast(`Added gallery "${label}" — will be saved with your next photo.`)
 })
 
+// ---------- Location map ----------
+
+function initLocationMap() {
+  if (locationMap) return
+  locationMap = L.map('location-map', { zoomControl: true }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 18,
+  }).addTo(locationMap)
+
+  locationMap.on('click', (e) => {
+    setLocation(e.latlng.lat, e.latlng.lng)
+  })
+}
+
+function setLocation(lat, lng) {
+  currentLocation = { lat, lng }
+  if (locationMarker) {
+    locationMarker.setLatLng([lat, lng])
+  } else {
+    locationMarker = L.marker([lat, lng]).addTo(locationMap)
+  }
+  updateLocationDisplay()
+}
+
+function clearLocation() {
+  currentLocation = null
+  if (locationMarker) {
+    locationMap.removeLayer(locationMarker)
+    locationMarker = null
+  }
+  updateLocationDisplay()
+}
+
+function updateLocationDisplay() {
+  const valueEl = el('location-value')
+  const clearBtn = el('clear-location-btn')
+  if (currentLocation) {
+    valueEl.textContent = `${currentLocation.lat.toFixed(4)}, ${currentLocation.lng.toFixed(4)}`
+    clearBtn.hidden = false
+  } else {
+    valueEl.textContent = 'Not tagged'
+    clearBtn.hidden = true
+  }
+}
+
+el('clear-location-btn').addEventListener('click', clearLocation)
+
+// Leaflet needs a visible container with real dimensions to size itself correctly.
+// The map div is inside the form, which starts hidden, so (re-)init/resize whenever
+// the form becomes visible. Pass a callback to run anything (like setView) after
+// the size recalculation so it isn't overridden by a mis-sized initial render.
+function refreshLocationMap(afterResize) {
+  initLocationMap()
+  setTimeout(() => {
+    locationMap.invalidateSize()
+    if (afterResize) afterResize()
+  }, 0)
+}
+
 // ---------- File selection + EXIF ----------
 
 el('file-drop').addEventListener('click', () => el('file-input').click())
@@ -133,7 +200,10 @@ async function handleFile(file) {
   }
 
   el('photo-form').hidden = false
+  clearLocation()
+  refreshLocationMap()
 }
+
 
 function formatShutter(seconds) {
   if (seconds >= 1) return `${seconds}s`
@@ -287,6 +357,11 @@ el('photo-form').addEventListener('submit', async (e) => {
       editingEntry.description = description
       editingEntry.featured = featured
       editingEntry.exif = exif
+      if (currentLocation) {
+        editingEntry.location = currentLocation
+      } else {
+        delete editingEntry.location
+      }
 
       await saveStore()
       showToast(`Updated "${title}".`)
@@ -303,7 +378,7 @@ el('photo-form').addEventListener('submit', async (e) => {
 
       const order = store.photos.filter((p) => p.category === categoryId).length
 
-      store.photos.push({
+      const newPhoto = {
         id: filename.replace(/\.webp$/, ''),
         category: categoryId,
         filename,
@@ -312,7 +387,10 @@ el('photo-form').addEventListener('submit', async (e) => {
         order,
         featured,
         exif,
-      })
+      }
+      if (currentLocation) newPhoto.location = currentLocation
+
+      store.photos.push(newPhoto)
 
       await saveStore()
       showToast(`Saved "${title}" to ${categoryId}.`)
@@ -339,6 +417,7 @@ function resetForm() {
   el('new-category-row').hidden = true
   el('cancel-edit-btn').hidden = true
   el('save-btn').textContent = 'Save to gallery'
+  clearLocation()
 }
 
 function startEdit(entry) {
@@ -362,6 +441,14 @@ function startEdit(entry) {
   el('new-category-row').hidden = true
   el('cancel-edit-btn').hidden = false
   el('save-btn').textContent = 'Save changes'
+
+  clearLocation()
+  refreshLocationMap(() => {
+    if (entry.location) {
+      setLocation(entry.location.lat, entry.location.lng)
+      locationMap.setView([entry.location.lat, entry.location.lng], 13)
+    }
+  })
 
   el('photo-form').scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
