@@ -404,6 +404,8 @@ button {
 
 .lightbox-img-wrap {
   position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   max-height: 74vh;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -422,8 +424,8 @@ button {
 
 .lightbox-img-wrap img {
   width: 100%;
-  height: 74vh;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   transform-origin: center center;
   user-select: none;
   -webkit-user-drag: none;
