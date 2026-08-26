@@ -376,6 +376,16 @@ button {
   justify-content: center;
   padding: clamp(16px, 4vw, 48px);
   padding-top: max(clamp(16px, 4vw, 48px), env(safe-area-inset-top) + 56px);
+  overflow-y: auto;
+}
+
+@media (max-width: 899px) {
+  .lightbox {
+    /* On phones, the image + caption + map can be taller than the screen.
+       Top-align (instead of centering) and let the box scroll so nothing
+       below the image gets stranded off-screen with no way to reach it. */
+    align-items: flex-start;
+  }
 }
 
 .lightbox[hidden] {
@@ -389,6 +399,7 @@ button {
   flex-direction: column;
   gap: 16px;
   position: relative;
+  padding-bottom: 8px;
 }
 
 .lightbox-img-wrap {

@@ -283,7 +283,7 @@ function showLightboxMap(location) {
     lightboxMap.on('click', () => {
       if (!currentLightboxLocation) return
       const { lat, lng } = currentLightboxLocation
-      window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank', 'noopener')
+      window.open(`https://www.google.com/maps?q=${lat},${lng}&t=k`, '_blank', 'noopener')
     })
   }
 
