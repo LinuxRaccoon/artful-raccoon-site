@@ -83,6 +83,18 @@ button {
   border-bottom: 1px solid var(--border);
 }
 
+.site-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-logo {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
 .site-title {
   font-family: var(--font-display);
   font-size: clamp(20px, 2.4vw, 26px);

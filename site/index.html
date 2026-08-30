@@ -7,10 +7,22 @@
   <meta name="description" content="Wildlife, landscape, and astro photography.">
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#141513">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Artful Raccoon">
 </head>
 <body>
   <header class="site-header">
-    <span class="site-title">Artful <span class="accent">Raccoon</span></span>
+    <div class="site-brand">
+      <img class="site-logo" src="assets/logo-header.png" alt="Artful Raccoon logo">
+      <span class="site-title">Artful <span class="accent">Raccoon</span></span>
+    </div>
     <nav class="site-tagline" id="site-tagline"></nav>
   </header>
 
@@ -58,6 +70,16 @@
   </div>
 
   <script>document.getElementById('year').textContent = new Date().getFullYear()</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {
+          // Installability/offline support is a nice-to-have; if registration
+          // fails for any reason, the site should still work perfectly well.
+        })
+      })
+    }
+  </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/main.js"></script>
 </body>
